@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinMatio — Nền Tảng AI Trading Tự Động</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   RESET & BASE
+   ═══════════════════════════════════════════ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family:'Inter',system-ui,sans-serif;
+  background:#0d1017;
+  color:#eceef2;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+a { text-decoration:none; color:inherit; }
+button { border:none; background:none; cursor:pointer; font-family:inherit; }
+ul { list-style:none; }
+::selection { background:rgba(42,164,255,.3); color:#fff; }
+
+/* scrollbar */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:#0d1017; }
+::-webkit-scrollbar-thumb { background:#434c62; border-radius:99px; }
+
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+   ═══════════════════════════════════════════ */
+:root {
+  --brand-300:#8adbff; --brand-400:#52c4ff; --brand-500:#2aa4ff;
+  --brand-600:#1486f5; --brand-700:#0d6ee1;
+  --accent-400:#4ade80; --accent-500:#22c55e;
+  --dark-100:#eceef2; --dark-300:#b0b8c9; --dark-400:#8592ab;
+  --dark-500:#667591; --dark-600:#515d78; --dark-700:#434c62;
+  --dark-800:#3a4153; --dark-900:#1a1f2e; --dark-950:#0d1017;
+  --violet-400:#a78bfa; --violet-500:#8b5cf6;
+  --amber-400:#fbbf24; --amber-500:#f59e0b;
+  --red-400:#f87171; --emerald-400:#34d399;
+}
+
+/* ═══════════════════════════════════════════
+   UTILITY CLASSES
+   ═══════════════════════════════════════════ */
+.container { max-width:1200px; margin:0 auto; padding:0 20px; }
+.section { padding:100px 20px; position:relative; }
+
+.gradient-text {
+  background:linear-gradient(135deg,var(--brand-400),var(--brand-300),var(--accent-400));
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+.gradient-text-subtle {
+  background:linear-gradient(135deg,#fff,var(--dark-300));
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+
+.glass-card {
+  position:relative; overflow:hidden; border-radius:16px;
+  border:1px solid rgba(255,255,255,.06);
+  background:rgba(255,255,255,.03);
+  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+}
+.glass-card::before {
+  content:''; position:absolute; inset:0; border-radius:16px; pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,255,255,.05) 0%,transparent 50%);
+}
+.glass-card-hover {
+  transition:all .5s;
+}
+.glass-card-hover:hover {
+  border-color:rgba(42,164,255,.2);
+  box-shadow:0 10px 40px rgba(42,164,255,.05);
+  transform:translateY(-4px);
+}
+
+.btn-primary {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:14px 28px; border-radius:12px;
+  background:var(--brand-600); color:#fff;
+  font-weight:600; font-size:15px;
+  transition:all .3s;
+}
+.btn-primary:hover { background:var(--brand-500); box-shadow:0 8px 30px rgba(42,164,255,.25); }
+
+.btn-secondary {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:14px 28px; border-radius:12px;
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.05); color:#fff;
+  font-weight:600; font-size:15px;
+  transition:all .3s;
+}
+.btn-secondary:hover { border-color:rgba(42,164,255,.3); background:rgba(255,255,255,.1); }
+
+.badge {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 16px; border-radius:99px;
+  border:1px solid rgba(42,164,255,.2);
+  background:rgba(42,164,255,.1);
+  font-size:12px; font-weight:500; color:var(--brand-300);
+}
+.badge .dot { width:6px; height:6px; border-radius:50%; background:var(--accent-400); animation:pulse 2s infinite; }
+
+.section-label { text-align:center; margin-bottom:16px; }
+.section-title { text-align:center; font-size:clamp(28px,4vw,42px); font-weight:700; line-height:1.2; }
+.section-desc { text-align:center; margin-top:16px; font-size:16px; color:var(--dark-400); max-width:600px; margin-left:auto; margin-right:auto; line-height:1.7; }
+
+/* Backgrounds */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(42,164,255,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(42,164,255,.03) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+.glow { position:absolute; border-radius:50%; filter:blur(120px); pointer-events:none; }
+
+/* Animations */
+@keyframes pulse { 0%,100%{opacity:.4;transform:scale(.8)} 50%{opacity:1;transform:scale(1.2)} }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+@keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+@keyframes slideIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+@keyframes progressLine { from{width:0} to{width:100%} }
+
+/* ═══════════════════════════════════════════
+   SCROLL ANIMATIONS
+   ═══════════════════════════════════════════ */
+/* Base hidden state for all animated elements */
+[data-anim] {
+  opacity:0;
+  transition:opacity .8s cubic-bezier(.16,1,.3,1),
+             transform .8s cubic-bezier(.16,1,.3,1);
+  will-change:opacity,transform;
+}
+[data-anim].in-view { opacity:1; transform:none; }
+/* Allow hover transforms to work after scroll animation completes */
+[data-anim].in-view.glass-card-hover:hover { transform:translateY(-4px); }
+
+/* Animation types */
+[data-anim="fade-up"] { transform:translateY(50px); }
+[data-anim="fade-down"] { transform:translateY(-40px); }
+[data-anim="fade-left"] { transform:translateX(-60px); }
+[data-anim="fade-right"] { transform:translateX(60px); }
+[data-anim="scale-up"] { transform:scale(.85); }
+[data-anim="zoom-in"] { transform:scale(.9) translateY(30px); }
+[data-anim="flip-up"] { transform:perspective(800px) rotateX(8deg) translateY(40px); }
+
+/* Stagger delays via CSS custom property */
+[data-anim][data-delay="1"] { transition-delay:.1s; }
+[data-anim][data-delay="2"] { transition-delay:.2s; }
+[data-anim][data-delay="3"] { transition-delay:.3s; }
+[data-anim][data-delay="4"] { transition-delay:.4s; }
+[data-anim][data-delay="5"] { transition-delay:.5s; }
+[data-anim][data-delay="6"] { transition-delay:.6s; }
+
+/* Longer / shorter durations */
+[data-anim][data-dur="fast"] { transition-duration:.5s; }
+[data-anim][data-dur="slow"] { transition-duration:1.2s; }
+
+/* Floating particles for section dividers */
+.section-particles {
+  position:absolute; inset:0; overflow:hidden; pointer-events:none;
+}
+.particle {
+  position:absolute; border-radius:50%; opacity:0;
+  animation:particleFloat 6s ease-in-out infinite;
+}
+@keyframes particleFloat {
+  0% { opacity:0; transform:translateY(0) scale(.5); }
+  30% { opacity:.6; }
+  70% { opacity:.4; }
+  100% { opacity:0; transform:translateY(-120px) scale(1); }
+}
+
+/* Gradient border animation on cards when in view */
+@keyframes borderGlow {
+  0%,100% { border-color:rgba(255,255,255,.06); }
+  50% { border-color:rgba(42,164,255,.2); }
+}
+.glass-card.in-view { animation:borderGlow 3s ease-in-out 1; }
+
+/* Counter animation helper */
+.counter-val { display:inline-block; }
+
+/* Parallax glow movement */
+.glow[data-parallax] { transition:transform .1s linear; }
+
+/* Infra line fill on scroll */
+.infra-line .fill { width:0; transition:width 1.2s cubic-bezier(.16,1,.3,1) .3s; }
+.infra-card.in-view .infra-line .fill { width:100%; }
+
+/* Staggered feature items */
+.eco-card.in-view .feat {
+  animation:slideIn .5s forwards;
+}
+.eco-card.in-view .feat:nth-child(1) { animation-delay:.3s; }
+.eco-card.in-view .feat:nth-child(2) { animation-delay:.45s; }
+.eco-card.in-view .feat:nth-child(3) { animation-delay:.6s; }
+.eco-card .feat { opacity:0; }
+
+/* Dashboard card stats counter pop */
+@keyframes statPop {
+  0% { transform:scale(.8); opacity:0; }
+  60% { transform:scale(1.05); }
+  100% { transform:scale(1); opacity:1; }
+}
+.stat-box.in-view { animation:statPop .5s cubic-bezier(.16,1,.3,1) forwards; }
+.stat-box { opacity:0; }
+.stat-box:nth-child(1) { animation-delay:.1s; }
+.stat-box:nth-child(2) { animation-delay:.25s; }
+.stat-box:nth-child(3) { animation-delay:.4s; }
+
+/* Trade rows slide in */
+@keyframes tradeSlide {
+  from { opacity:0; transform:translateX(-20px); }
+  to { opacity:1; transform:translateX(0); }
+}
+.trades-section.in-view .trade-row {
+  animation:tradeSlide .4s forwards;
+}
+.trade-row { opacity:0; }
+.trades-section.in-view .trade-row:nth-child(1) { animation-delay:.15s; }
+.trades-section.in-view .trade-row:nth-child(2) { animation-delay:.3s; }
+.trades-section.in-view .trade-row:nth-child(3) { animation-delay:.45s; }
+
+/* CTA section special glow pulse */
+@keyframes ctaGlowPulse {
+  0%,100% { opacity:.08; transform:translate(-50%,-50%) scale(1); }
+  50% { opacity:.15; transform:translate(-50%,-50%) scale(1.1); }
+}
+.cta .glow.in-view { animation:ctaGlowPulse 4s ease-in-out infinite; }
+
+/* Signal items stagger */
+.signal-item { opacity:0; transform:translateY(12px); transition:all .4s ease; }
+.signal-list-ready .signal-item:nth-child(1) { opacity:1; transform:none; transition-delay:.1s; }
+.signal-list-ready .signal-item:nth-child(2) { opacity:1; transform:none; transition-delay:.2s; }
+.signal-list-ready .signal-item:nth-child(3) { opacity:1; transform:none; transition-delay:.3s; }
+.signal-list-ready .signal-item:nth-child(4) { opacity:1; transform:none; transition-delay:.4s; }
+.signal-list-ready .signal-item:nth-child(5) { opacity:1; transform:none; transition-delay:.5s; }
+.signal-list-ready .signal-item:nth-child(6) { opacity:1; transform:none; transition-delay:.6s; }
+
+/* Footer columns stagger */
+.footer-col { opacity:0; transform:translateY(20px); transition:all .6s ease; }
+.footer-ready .footer-col:nth-child(1) { opacity:1; transform:none; transition-delay:.1s; }
+.footer-ready .footer-col:nth-child(2) { opacity:1; transform:none; transition-delay:.2s; }
+.footer-ready .footer-col:nth-child(3) { opacity:1; transform:none; transition-delay:.3s; }
+.footer-ready .footer-col:nth-child(4) { opacity:1; transform:none; transition-delay:.4s; }
+.footer-ready .footer-col:nth-child(5) { opacity:1; transform:none; transition-delay:.5s; }
+
+/* CTA badges stagger */
+.cta-badge { opacity:0; transform:translateY(15px); transition:all .4s ease; }
+.cta-badges.in-view .cta-badge:nth-child(1) { opacity:1; transform:none; transition-delay:.2s; }
+.cta-badges.in-view .cta-badge:nth-child(2) { opacity:1; transform:none; transition-delay:.35s; }
+.cta-badges.in-view .cta-badge:nth-child(3) { opacity:1; transform:none; transition-delay:.5s; }
+
+/* ═══════════════════════════════════════════
+   NAVBAR
+   ═══════════════════════════════════════════ */
+.navbar {
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  padding:20px 0; transition:all .5s;
+}
+.navbar.scrolled {
+  padding:12px 0;
+  background:rgba(13,16,23,.85);
+  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.navbar .container { display:flex; align-items:center; justify-content:space-between; }
+
+.logo { display:flex; align-items:center; gap:10px; }
+.logo-icon {
+  width:36px; height:36px; border-radius:10px;
+  background:rgba(20,134,245,.2);
+  display:flex; align-items:center; justify-content:center;
+}
+.logo-icon svg { width:20px; height:20px; color:var(--brand-400); }
+.logo-text { font-size:20px; font-weight:700; color:#fff; }
+.logo-text span { color:var(--brand-400); }
+
+.nav-links { display:flex; align-items:center; gap:4px; }
+.nav-links a {
+  padding:8px 16px; border-radius:8px;
+  font-size:14px; font-weight:500; color:var(--dark-300);
+  transition:color .2s;
+}
+.nav-links a:hover { color:#fff; }
+
+.nav-actions { display:flex; align-items:center; gap:12px; }
+.nav-actions .signin { padding:8px 16px; font-size:14px; font-weight:500; color:var(--dark-300); transition:color .2s; }
+.nav-actions .signin:hover { color:#fff; }
+.nav-actions .signup { padding:10px 20px; font-size:14px; }
+
+.mobile-toggle { display:none; padding:8px; color:var(--dark-300); }
+.mobile-toggle svg { width:24px; height:24px; }
+
+.mobile-menu {
+  display:none; position:fixed; top:60px; left:0; right:0;
+  background:rgba(13,16,23,.97); backdrop-filter:blur(20px);
+  border-top:1px solid rgba(255,255,255,.06);
+  padding:20px;
+}
+.mobile-menu.open { display:block; }
+.mobile-menu a {
+  display:block; padding:12px 16px; font-size:14px;
+  color:var(--dark-300); border-radius:8px; transition:all .2s;
+}
+.mobile-menu a:hover { color:#fff; background:rgba(255,255,255,.05); }
+.mobile-menu .btn-primary { display:flex; justify-content:center; margin-top:16px; }
+
+@media(max-width:900px) {
+  .nav-links, .nav-actions { display:none; }
+  .mobile-toggle { display:block; }
+}
+
+/* ═══════════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════════ */
+.hero {
+  min-height:100vh; display:flex; align-items:center;
+  position:relative; overflow:hidden; padding-top:100px;
+}
+.hero .bg-grid { position:absolute; inset:0; opacity:.6; }
+.hero .glow-1 { top:-300px; left:50%; transform:translateX(-50%); width:800px; height:600px; background:rgba(20,134,245,.07); }
+.hero .glow-2 { bottom:-200px; right:-150px; width:600px; height:400px; background:rgba(34,197,94,.04); }
+
+.hero-inner { position:relative; z-index:1; display:flex; align-items:center; gap:60px; }
+.hero-content { flex:1; }
+.hero-terminal { flex:1; max-width:520px; }
+
+.hero h1 { font-size:clamp(36px,5vw,58px); font-weight:700; line-height:1.1; }
+.hero p.desc { margin-top:24px; font-size:18px; color:var(--dark-400); line-height:1.7; max-width:520px; }
+
+.hero-btns { display:flex; gap:16px; margin-top:32px; flex-wrap:wrap; }
+
+.hero-stats { display:flex; gap:40px; margin-top:48px; }
+.hero-stats .stat-icon { display:flex; align-items:center; gap:6px; }
+.hero-stats .stat-icon svg { width:16px; height:16px; color:var(--brand-400); }
+.hero-stats .stat-val { font-size:24px; font-weight:700; color:#fff; }
+.hero-stats .stat-label { font-size:12px; color:var(--dark-500); margin-top:2px; }
+
+/* Terminal */
+.terminal { animation:float 6s ease-in-out infinite; }
+.terminal-header {
+  display:flex; align-items:center; gap:8px;
+  padding:12px 16px;
+  background:rgba(26,31,46,.5);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  border-radius:16px 16px 0 0;
+}
+.terminal-dots { display:flex; gap:6px; }
+.terminal-dots span { width:12px; height:12px; border-radius:50%; }
+.terminal-dots .r { background:rgba(239,68,68,.6); }
+.terminal-dots .y { background:rgba(245,158,11,.6); }
+.terminal-dots .g { background:rgba(34,197,94,.6); }
+.terminal-title { margin-left:8px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--dark-500); }
+.terminal-body { padding:20px; min-height:280px; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.8; }
+.terminal-line { display:flex; gap:8px; opacity:0; animation:slideIn .5s forwards; }
+.terminal-line .prompt { color:var(--brand-600); flex-shrink:0; }
+.terminal-cursor { display:inline-block; width:8px; height:16px; background:rgba(82,196,255,.8); animation:blink 1s infinite; margin-top:4px; }
+
+.hero-fade { position:absolute; bottom:0; left:0; right:0; height:120px; background:linear-gradient(to top,#0d1017,transparent); }
+
+@media(max-width:900px) {
+  .hero-inner { flex-direction:column; text-align:center; }
+  .hero-content { align-items:center; display:flex; flex-direction:column; }
+  .hero-terminal { max-width:100%; }
+  .hero-stats { justify-content:center; }
+  .hero-btns { justify-content:center; }
+}
+
+/* ═══════════════════════════════════════════
+   ECOSYSTEM
+   ═══════════════════════════════════════════ */
+.eco-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:24px; margin-top:60px; }
+@media(max-width:768px) { .eco-grid { grid-template-columns:1fr; } }
+
+.eco-card { padding:32px; }
+.eco-card-head { display:flex; align-items:flex-start; justify-content:space-between; }
+.eco-card-icon-wrap { display:flex; align-items:center; gap:12px; }
+.eco-card-icon {
+  width:48px; height:48px; border-radius:12px; padding:1px;
+  display:flex; align-items:center; justify-content:center;
+}
+.eco-card-icon .inner {
+  width:100%; height:100%; border-radius:11px;
+  background:var(--dark-950);
+  display:flex; align-items:center; justify-content:center;
+}
+.eco-card-icon svg { width:20px; height:20px; color:#fff; }
+.eco-card h3 { font-size:18px; font-weight:600; color:#fff; }
+.eco-card .tagline { font-size:12px; color:var(--dark-500); }
+.eco-card .card-badge {
+  padding:4px 12px; border-radius:99px; font-size:10px;
+  font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:#fff;
+}
+.eco-card p.card-desc { margin-top:16px; font-size:14px; color:var(--dark-400); line-height:1.7; }
+.eco-card .hl-red { color:#f87171; font-weight:600; }
+.eco-card .hl-green { color:var(--accent-400); font-weight:600; }
+.eco-card .features { margin-top:24px; display:flex; flex-direction:column; gap:12px; }
+.eco-card .feat { display:flex; align-items:center; gap:12px; font-size:14px; color:var(--dark-300); }
+.eco-card .feat-icon {
+  width:28px; height:28px; border-radius:8px; flex-shrink:0;
+  background:rgba(255,255,255,.04);
+  display:flex; align-items:center; justify-content:center;
+}
+.eco-card .feat-icon svg { width:14px; height:14px; color:var(--dark-300); }
+.eco-card .card-cta {
+  display:inline-flex; align-items:center; gap:6px;
+  margin-top:24px; font-size:14px; font-weight:500;
+  color:var(--brand-400); transition:gap .3s;
+}
+.eco-card:hover .card-cta { gap:10px; }
+.eco-card .card-cta svg { width:14px; height:14px; }
+
+/* Signal Bot full-width layout */
+.eco-card-2col { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+@media(max-width:900px) { .eco-card-2col { grid-template-columns:1fr; } }
+
+/* ═══════════════════════════════════════════
+   COLLAPSIBLE SOLUTION + REVEAL BUTTON
+   ═══════════════════════════════════════════ */
+.card-solution {
+  max-height:0; overflow:hidden; opacity:0;
+  transition:max-height .6s cubic-bezier(.4,0,.2,1), opacity .5s ease, margin .4s ease;
+  margin-top:0;
+}
+.card-solution.open {
+  max-height:600px; opacity:1; margin-top:10px;
+}
+
+.btn-reveal {
+  display:inline-flex; align-items:center; gap:8px;
+  margin-top:18px; padding:10px 22px;
+  font-size:13px; font-weight:600; letter-spacing:.3px;
+  color:#fff;
+  background:linear-gradient(135deg, rgba(42,164,255,.15), rgba(74,222,128,.1));
+  border:1px solid rgba(42,164,255,.3);
+  border-radius:50px; cursor:pointer;
+  position:relative; overflow:hidden;
+  transition:all .3s ease;
+}
+.btn-reveal::before {
+  content:''; position:absolute; inset:-2px; border-radius:50px;
+  background:linear-gradient(135deg, var(--brand-500), var(--accent-400));
+  opacity:0; z-index:-1;
+  transition:opacity .3s ease;
+}
+.btn-reveal:hover::before { opacity:.15; }
+.btn-reveal:hover {
+  border-color:rgba(42,164,255,.5);
+  box-shadow:0 0 20px rgba(42,164,255,.15), 0 0 40px rgba(74,222,128,.08);
+  transform:translateY(-1px);
+}
+
+/* Pulsing glow ring animation */
+.btn-reveal .pulse-ring {
+  position:absolute; inset:-4px; border-radius:50px;
+  border:2px solid var(--brand-400);
+  animation:pulseGlow 2.5s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes pulseGlow {
+  0%,100% { opacity:0; transform:scale(1); }
+  50% { opacity:.5; transform:scale(1.04); }
+}
+
+/* Arrow bounce */
+.btn-reveal .reveal-arrow {
+  display:inline-block; transition:transform .3s ease;
+  animation:arrowBounce 1.8s ease-in-out infinite;
+}
+@keyframes arrowBounce {
+  0%,100% { transform:translateY(0); }
+  50% { transform:translateY(3px); }
+}
+.btn-reveal.open .reveal-arrow {
+  animation:none; transform:rotate(180deg);
+}
+
+/* Shimmer sweep on button */
+.btn-reveal .shimmer {
+  position:absolute; top:0; left:-100%; width:100%; height:100%;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent);
+  animation:shimmerSweep 3s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes shimmerSweep {
+  0% { left:-100%; }
+  40%,100% { left:100%; }
+}
+
+/* Subtle text glow */
+.btn-reveal .btn-text {
+  animation:textGlow 2.5s ease-in-out infinite;
+}
+@keyframes textGlow {
+  0%,100% { text-shadow:0 0 0 transparent; }
+  50% { text-shadow:0 0 8px rgba(42,164,255,.4); }
+}
+
+/* Signal Feed Live (inside Signal Bot) */
+.signal-live-box {
+  margin-top:24px; border-radius:14px; overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(135deg, rgba(59,130,246,.12), rgba(14,165,233,.10));
+}
+.signal-live-header { padding:20px 20px 0; }
+.signal-live-header h4 { font-size:17px; font-weight:600; color:#fff; margin-bottom:4px; }
+.signal-live-header p { font-size:13px; color:var(--dark-400); margin-bottom:16px; }
+.signal-live-scroll {
+  height:400px; overflow-y:auto; padding:0 12px 12px;
+  display:flex; flex-direction:column; gap:8px;
+}
+.signal-live-scroll::-webkit-scrollbar { width:4px; }
+.signal-live-scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,.12); border-radius:99px; }
+
+/* Pinned / featured signal */
+.sl-card {
+  padding:14px 16px; border-radius:10px; font-family:'JetBrains Mono',monospace;
+  border:1px solid rgba(255,255,255,.06);
+  background:rgba(0,0,0,.25);
+  transition:border-color .2s, background .2s;
+}
+.sl-card:hover { border-color:rgba(255,255,255,.14); background:rgba(0,0,0,.35); }
+.sl-card.pinned {
+  background:linear-gradient(135deg, rgba(79,70,229,.25), rgba(14,165,233,.20));
+  border-color:rgba(255,255,255,.15);
+}
+.sl-row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.sl-pair { font-size:14px; font-weight:600; color:#fff; }
+.sl-tf {
+  font-size:10px; font-weight:700; text-transform:uppercase;
+  background:#fff; color:var(--dark-900); padding:1px 7px; border-radius:5px;
+}
+.sl-time { font-size:11px; color:rgba(255,255,255,.45); font-variant-numeric:tabular-nums; }
+.sl-type {
+  font-size:10px; font-weight:700; text-transform:uppercase;
+  color:var(--amber-400); margin-left:auto;
+}
+.sl-detail { margin-top:6px; font-size:13px; color:rgba(255,255,255,.8); line-height:1.5; font-family:'Inter',sans-serif; }
+.sl-detail span { font-weight:500; color:#fff; }
+.sl-footer { padding:12px 20px; font-size:11px; color:var(--dark-500); font-style:italic; }
+
+@media(max-width:768px) {
+  .signal-live-scroll { height:320px; }
+}
+
+/* AutoTrade Live Snapshot */
+.at-snapshot {
+  margin-top:0; border-radius:14px; overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(135deg, rgba(100,80,200,.10), rgba(80,70,120,.10));
+}
+.at-snapshot-header { padding:20px 20px 0; display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.at-snapshot-header h4 { font-size:17px; font-weight:600; color:#fff; margin-bottom:2px; }
+.at-snapshot-header p { font-size:13px; color:var(--dark-400); }
+.at-snapshot-header .at-refresh {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 14px; border-radius:99px; font-size:12px; font-weight:500;
+  background:rgba(255,255,255,.08); color:var(--dark-300); border:none; cursor:pointer;
+  transition:background .2s;
+}
+.at-snapshot-header .at-refresh:hover { background:rgba(255,255,255,.15); color:#fff; }
+
+.at-bots { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:16px; }
+@media(max-width:900px) { .at-bots { grid-template-columns:1fr; } }
+
+.at-bot-card {
+  padding:16px; border-radius:12px;
+  background:rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.05);
+  font-family:'JetBrains Mono',monospace;
+  transition:border-color .2s;
+}
+.at-bot-card:hover { border-color:rgba(255,255,255,.12); }
+.at-bot-head { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:14px; }
+.at-bot-name { font-size:14px; font-weight:600; color:#fff; font-family:'Inter',sans-serif; }
+.at-bot-sub { font-size:11px; color:var(--dark-400); font-family:'Inter',sans-serif; }
+.at-status {
+  font-size:10px; font-weight:700; text-transform:uppercase;
+  padding:3px 10px; border-radius:6px;
+}
+.at-status.open { background:rgba(22,163,74,.25); color:var(--accent-400); }
+.at-status.last { background:rgba(255,255,255,.08); color:var(--dark-300); }
+
+.at-rows { display:flex; flex-direction:column; gap:8px; }
+.at-row { display:flex; justify-content:space-between; align-items:center; }
+.at-label { font-size:11px; color:var(--dark-500); }
+.at-value { font-size:13px; color:#fff; }
+.at-value.buy { color:var(--accent-400); font-weight:600; }
+.at-value.sell { color:var(--red-400); font-weight:600; }
+.at-pnl { padding-top:8px; border-top:1px solid rgba(255,255,255,.06); margin-top:4px; }
+.at-pnl .at-value { font-weight:700; }
+.at-pnl .at-value.pos { color:var(--accent-400); }
+.at-pnl .at-value.neg { color:var(--red-400); }
+
+/* Risk Manager Alerts Overview */
+.rm-alerts {
+  margin-top:0; border-radius:14px; overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(135deg, rgba(16,185,129,.10), rgba(20,184,166,.08));
+}
+.rm-alerts-header { padding:20px 20px 4px; }
+.rm-alerts-header h4 { font-size:17px; font-weight:600; color:#fff; margin-bottom:2px; }
+.rm-alerts-header p { font-size:13px; color:var(--dark-400); }
+
+.rm-cards { display:flex; flex-direction:column; gap:10px; padding:16px; }
+
+.rm-card {
+  padding:16px; border-radius:12px;
+  background:rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.06);
+  transition:border-color .2s;
+}
+.rm-card:hover { border-color:rgba(255,255,255,.12); }
+.rm-card.severity-alert { box-shadow:inset 0 0 0 1px rgba(244,63,94,.3); }
+.rm-card.severity-warn  { box-shadow:inset 0 0 0 1px rgba(245,158,11,.25); }
+
+.rm-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom:12px; }
+.rm-card-title { font-size:14px; font-weight:600; color:#fff; }
+.rm-card-sub { font-size:11px; color:var(--dark-400); margin-top:1px; }
+.rm-badge {
+  font-size:10px; font-weight:700; text-transform:uppercase;
+  padding:3px 10px; border-radius:6px; flex-shrink:0;
+}
+.rm-badge.alert { background:rgba(225,29,72,.35); color:#fda4af; }
+.rm-badge.ok    { background:rgba(22,163,74,.25); color:var(--accent-400); }
+
+.rm-body { font-family:'JetBrains Mono',monospace; font-size:13px; color:#fff; }
+.rm-body .rm-metric { margin-bottom:6px; }
+.rm-body .rm-metric span { font-weight:700; }
+.rm-body .rm-note { font-size:11px; color:var(--dark-400); font-family:'Inter',sans-serif; margin-top:4px; line-height:1.5; }
+.rm-action {
+  display:inline-block; margin-top:10px; padding:4px 12px; border-radius:6px;
+  font-size:12px; font-weight:700; font-family:'Inter',sans-serif;
+}
+.rm-action.block  { background:rgba(225,29,72,.3); color:#fda4af; }
+.rm-action.review { background:rgba(245,158,11,.25); color:var(--amber-400); }
+
+.rm-footer { padding:10px 20px; font-size:11px; color:var(--dark-500); font-style:italic; }
+
+.eco-disclaimer { text-align:center; margin-top:40px; font-size:12px; color:var(--dark-600); max-width:700px; margin-left:auto; margin-right:auto; line-height:1.7; }
+
+/* Gradient backgrounds for icons */
+.grad-blue { background:linear-gradient(135deg,#3b82f6,#22d3ee); }
+.grad-green { background:linear-gradient(135deg,#10b981,#14b8a6); }
+.grad-violet { background:linear-gradient(135deg,#8b5cf6,#a855f7); }
+.grad-amber { background:linear-gradient(135deg,#f59e0b,#f97316); }
+
+/* ═══════════════════════════════════════════
+   INFRASTRUCTURE
+   ═══════════════════════════════════════════ */
+.infra-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:60px; }
+@media(max-width:900px) { .infra-grid { grid-template-columns:1fr; } }
+
+.infra-card { padding:32px; }
+.infra-icon {
+  width:56px; height:56px; border-radius:16px; padding:1px;
+  display:inline-flex; align-items:center; justify-content:center;
+}
+.infra-icon .inner {
+  width:100%; height:100%; border-radius:15px;
+  background:var(--dark-950);
+  display:flex; align-items:center; justify-content:center;
+}
+.infra-icon svg { width:24px; height:24px; color:#fff; }
+.infra-card h3 { margin-top:24px; font-size:20px; font-weight:600; color:#fff; }
+.infra-card p { margin-top:12px; font-size:14px; color:var(--dark-400); line-height:1.7; }
+.infra-details { margin-top:24px; display:flex; flex-direction:column; gap:10px; }
+.infra-detail { display:flex; align-items:center; gap:10px; font-size:14px; color:var(--dark-300); }
+.infra-detail .dot { width:4px; height:4px; border-radius:50%; flex-shrink:0; }
+.infra-line { margin-top:32px; height:1px; background:rgba(255,255,255,.06); overflow:hidden; border-radius:99px; }
+.infra-line .fill { height:100%; width:0; transition:width .7s; }
+.infra-card:hover .infra-line .fill { width:100%; }
+
+/* ═══════════════════════════════════════════
+   DASHBOARD
+   ═══════════════════════════════════════════ */
+.dash-grid { display:grid; grid-template-columns:3fr 2fr; gap:24px; margin-top:60px; }
+@media(max-width:900px) { .dash-grid { grid-template-columns:1fr; } }
+
+.dash-tabs { display:flex; gap:4px; }
+.dash-tab {
+  display:flex; align-items:center; gap:6px;
+  padding:8px 14px; border-radius:8px;
+  font-size:12px; font-weight:500; color:var(--dark-500);
+  transition:all .2s; cursor:pointer;
+}
+.dash-tab.active { background:rgba(42,164,255,.1); color:var(--brand-400); }
+.dash-tab svg { width:14px; height:14px; }
+
+.dash-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 20px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.dash-time { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--dark-600); }
+
+.dash-body { padding:20px; }
+
+.stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.stat-box {
+  padding:12px; border-radius:12px;
+  border:1px solid rgba(255,255,255,.04);
+  background:rgba(255,255,255,.02);
+}
+.stat-box .label { font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:var(--dark-500); }
+.stat-box .val-row { display:flex; align-items:flex-end; gap:8px; margin-top:4px; }
+.stat-box .val { font-size:18px; font-weight:700; color:#fff; }
+.stat-box .change { font-size:12px; font-weight:500; margin-bottom:2px; }
+.stat-box .change.pos { color:var(--accent-400); }
+.stat-box .change.neg { color:var(--red-400); }
+
+.chart-placeholder {
+  margin-top:16px; height:180px; border-radius:12px;
+  border:1px dashed rgba(255,255,255,.06);
+  background:rgba(255,255,255,.01);
+  display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px;
+}
+.chart-placeholder svg { width:32px; height:32px; color:var(--dark-700); }
+.chart-placeholder p { font-size:12px; color:var(--dark-600); }
+.chart-placeholder small { font-size:10px; color:var(--dark-700); }
+
+.trades-section { margin-top:16px; }
+.trades-section .trades-label { font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:var(--dark-500); margin-bottom:8px; }
+.trade-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 12px; border-radius:8px;
+  background:rgba(255,255,255,.02); margin-bottom:4px;
+}
+.trade-left { display:flex; align-items:center; gap:8px; }
+.trade-type {
+  padding:2px 8px; border-radius:4px;
+  font-size:9px; font-weight:700; text-transform:uppercase;
+}
+.trade-type.long { background:rgba(16,185,129,.1); color:var(--emerald-400); }
+.trade-type.short { background:rgba(248,113,113,.1); color:var(--red-400); }
+.trade-pair { font-size:12px; font-weight:500; color:#fff; }
+.trade-entry { font-size:12px; color:var(--dark-500); }
+.trade-pnl { font-size:12px; font-weight:600; }
+.trade-pnl.pos { color:var(--accent-400); }
+.trade-pnl.neg { color:var(--red-400); }
+
+/* Signal Feed */
+.signal-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 20px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.signal-header .live { display:flex; align-items:center; gap:8px; }
+.signal-header .live .dot { width:6px; height:6px; border-radius:50%; background:var(--accent-400); animation:pulse 2s infinite; }
+.signal-header h3 { font-size:14px; font-weight:600; color:#fff; }
+.signal-header .view-all { font-size:10px; font-weight:500; color:var(--brand-400); display:flex; align-items:center; gap:4px; }
+.signal-header .view-all svg { width:12px; height:12px; }
+
+.signal-list { padding:8px; }
+.signal-item {
+  display:flex; align-items:flex-start; gap:12px;
+  padding:12px; border-radius:8px;
+  border-bottom:1px solid rgba(255,255,255,.04);
+  transition:background .2s;
+}
+.signal-item:last-child { border-bottom:none; }
+.signal-item:hover { background:rgba(255,255,255,.02); }
+.signal-icon svg { width:14px; height:14px; margin-top:2px; }
+.signal-info { flex:1; min-width:0; }
+.signal-meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.signal-pair { font-size:12px; font-weight:600; color:#fff; }
+.signal-tf { font-size:10px; color:var(--dark-600); }
+.signal-type {
+  padding:2px 8px; border-radius:6px;
+  font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.5px;
+  border:1px solid;
+}
+.signal-type.trend { background:rgba(59,130,246,.1); color:#60a5fa; border-color:rgba(59,130,246,.2); }
+.signal-type.signal { background:rgba(16,185,129,.1); color:var(--emerald-400); border-color:rgba(16,185,129,.2); }
+.signal-type.event { background:rgba(245,158,11,.1); color:var(--amber-400); border-color:rgba(245,158,11,.2); }
+.signal-detail { font-size:12px; color:var(--dark-400); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.signal-time { display:flex; align-items:center; gap:4px; font-size:10px; color:var(--dark-600); margin-top:4px; }
+.signal-time svg { width:12px; height:12px; }
+
+.signal-footer {
+  padding:12px 20px; text-align:center;
+  border-top:1px solid rgba(255,255,255,.04);
+  font-size:10px; color:var(--dark-600);
+}
+
+/* ═══════════════════════════════════════════
+   CTA
+   ═══════════════════════════════════════════ */
+.cta { text-align:center; }
+.cta-icon {
+  width:64px; height:64px; border-radius:16px; margin:0 auto 24px;
+  border:1px solid rgba(42,164,255,.2);
+  background:rgba(42,164,255,.1);
+  display:flex; align-items:center; justify-content:center;
+}
+.cta-icon svg { width:28px; height:28px; color:var(--brand-400); }
+.cta h2 { font-size:clamp(28px,4vw,48px); font-weight:700; line-height:1.2; }
+.cta p { margin-top:24px; font-size:18px; color:var(--dark-400); max-width:500px; margin-left:auto; margin-right:auto; line-height:1.7; }
+.cta-btns { display:flex; gap:16px; justify-content:center; margin-top:40px; flex-wrap:wrap; }
+.cta-badges { display:flex; gap:32px; justify-content:center; margin-top:48px; flex-wrap:wrap; }
+.cta-badge { display:flex; align-items:center; gap:8px; font-size:14px; color:var(--dark-500); }
+.cta-badge .dot { width:4px; height:4px; border-radius:50%; background:rgba(42,164,255,.6); }
+
+/* ═══════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════ */
+footer { border-top:1px solid rgba(255,255,255,.06); }
+.footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr; gap:32px; }
+@media(max-width:768px) { .footer-grid { grid-template-columns:1fr 1fr; } }
+.footer-brand p { margin-top:16px; font-size:14px; color:var(--dark-400); line-height:1.7; max-width:280px; }
+.social-links { display:flex; gap:12px; margin-top:24px; }
+.social-link {
+  width:36px; height:36px; border-radius:8px;
+  border:1px solid rgba(255,255,255,.06);
+  background:rgba(255,255,255,.03);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--dark-400); transition:all .2s;
+}
+.social-link:hover { border-color:rgba(42,164,255,.3); color:var(--brand-400); }
+.social-link svg { width:16px; height:16px; }
+
+.footer-col h4 { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--dark-300); }
+.footer-col ul { margin-top:16px; display:flex; flex-direction:column; gap:10px; }
+.footer-col a { font-size:14px; color:var(--dark-400); transition:color .2s; }
+.footer-col a:hover { color:#fff; }
+
+.footer-bottom {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-top:48px; padding-top:32px;
+  border-top:1px solid rgba(255,255,255,.06);
+  flex-wrap:wrap; gap:16px;
+}
+.footer-bottom p { font-size:12px; color:var(--dark-500); }
+.footer-bottom .disclaimer { max-width:500px; text-align:right; font-size:12px; color:var(--dark-600); line-height:1.6; }
+@media(max-width:768px) { .footer-bottom { flex-direction:column; text-align:center; }
+  .footer-bottom .disclaimer { text-align:center; } }
+
+/* ═══════════════════════════════════════════
+   SVG ICONS (inline)
+   ═══════════════════════════════════════════ */
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="container">
+    <a href="#" class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <div class="logo-text">Fin<span>Matio</span></div>
+    </a>
+    <div class="nav-links">
+      <a href="#">Trang chủ</a>
+      <a href="#solutions">Giải pháp</a>
+      <a href="#infra">Công nghệ</a>
+      <a href="#dashboard">Dashboard</a>
+      <a href="#">Bảng giá</a>
+      <a href="#">Blog</a>
+    </div>
+    <div class="nav-actions">
+      <a href="#" class="signin">Đăng nhập</a>
+      <a href="#" class="btn-primary signup">Bắt đầu ngay</a>
+    </div>
+    <button class="mobile-toggle" onclick="document.getElementById('mobileMenu').classList.toggle('open')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#">Trang chủ</a>
+  <a href="#solutions">Giải pháp</a>
+  <a href="#infra">Công nghệ</a>
+  <a href="#dashboard">Dashboard</a>
+  <a href="#">Bảng giá</a>
+  <a href="#">Blog</a>
+  <a href="#" class="btn-primary" style="margin-top:16px;justify-content:center">Bắt đầu ngay</a>
+</div>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="bg-grid"></div>
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="badge" data-anim="fade-up"><span class="dot"></span> Nền tảng Trading bằng AI</div>
+        <h1 data-anim="fade-up" data-delay="1">
+          <span class="gradient-text-subtle">Giao dịch thông minh hơn với</span><br>
+          <span class="gradient-text">Trí Tuệ Nhân Tạo</span>
+        </h1>
+        <p class="desc" data-anim="fade-up" data-delay="2">Từ cảnh báo Signal thông minh đến thực thi tự động hoàn toàn — hệ sinh thái AI của FinMatio giúp bạn giao dịch chính xác, kỷ luật và tự tin hơn.</p>
+        <div class="hero-btns" data-anim="fade-up" data-delay="3">
+          <a href="#" class="btn-primary">Dùng thử miễn phí <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+          <a href="#" class="btn-secondary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--brand-400)" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> Xem Demo</a>
+        </div>
+        <div class="hero-stats" data-anim="fade-up" data-delay="4">
+          <div>
+            <div class="stat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/></svg>
+              <span class="stat-val">12+</span>
+            </div>
+            <div class="stat-label">Chiến lược hoạt động</div>
+          </div>
+          <div>
+            <div class="stat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span class="stat-val">A+</span>
+            </div>
+            <div class="stat-label">Điểm rủi ro</div>
+          </div>
+          <div>
+            <div class="stat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+              <span class="stat-val">+8.4%</span>
+            </div>
+            <div class="stat-label">Trung bình / tháng</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-terminal" data-anim="fade-left" data-delay="3">
+        <div class="terminal glass-card" style="box-shadow:0 20px 60px rgba(42,164,255,.05)">
+          <div class="terminal-header">
+            <div class="terminal-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+            <span class="terminal-title">finmatio-ai — trading-engine</span>
+          </div>
+          <div class="terminal-body" id="terminalBody">
+            <!-- JS will populate -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-fade"></div>
+</section>
+
+<!-- ═══════════════ ECOSYSTEM ═══════════════ -->
+<section class="section" id="solutions">
+  <div class="container">
+    <div class="section-label" data-anim="fade-up"><div class="badge">Hệ sinh thái</div></div>
+    <h2 class="section-title" data-anim="fade-up" data-delay="1">
+      <span class="gradient-text-subtle">Hệ sinh thái </span><span class="gradient-text">AI Trading</span>
+    </h2>
+    <p class="section-desc" data-anim="fade-up" data-delay="2">Chọn mức độ tự động phù hợp với bạn — từ cảnh báo Signal thông minh đến CopyTrade hoàn toàn tự động.</p>
+
+    <div class="eco-grid">
+      <!-- Signal Bot (full-width with 2-col layout) -->
+      <div class="eco-card glass-card glass-card-hover" style="grid-column:1/-1" data-anim="zoom-in">
+        <div class="eco-card-2col">
+          <!-- Left: Info -->
+          <div>
+            <div class="eco-card-head">
+              <div class="eco-card-icon-wrap">
+                <div class="eco-card-icon grad-blue"><div class="inner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div></div>
+                <div><h3>Signal Trade Bot</h3><span class="tagline">Cảnh báo bằng AI</span></div>
+              </div>
+              <span class="card-badge grad-blue">Phổ biến</span>
+            </div>
+            <p class="card-desc">Bạn <span class="hl-red">không cần phải ngồi hàng giờ</span> mở MT4/MT5 để soi nến trên từng khung M1, M5, M15, M30, H1, H4, D1 nữa. Cũng <span class="hl-red">không cần căng mắt theo dõi biểu đồ liên tục</span> chỉ để tìm một cơ hội vào lệnh — rồi vì <span class="hl-red">sốt ruột mà vào ở những điểm Buy/Sell không thực sự tốt</span>.</p>
+            <button class="btn-reveal" onclick="toggleSolution(this)">
+              <span class="pulse-ring"></span>
+              <span class="shimmer"></span>
+              <span class="btn-text">Xem giải pháp từ AI</span>
+              <span class="reveal-arrow">▼</span>
+            </button>
+            <div class="card-solution">
+              <p class="card-desc" style="margin-top:10px">Hệ thống AI của chúng tôi sẽ đồng thời giám sát <span class="hl-green">tất cả các khung thời gian</span> và <span class="hl-green">các cặp FX mà bạn thiết lập</span> — chạy <span class="hl-green">24/7, không bỏ sót tín hiệu nào</span>. Khi phát hiện điểm Buy/Sell có xác suất cao, hệ thống <span class="hl-green">lập tức gửi cảnh báo đến bạn</span>. Bạn chỉ việc kiểm tra lại và <span class="hl-green">tự quyết định có vào lệnh hay không</span> — chủ động hoàn toàn, <span class="hl-green">không bị áp lực</span>, <span class="hl-green">không bỏ lỡ điểm đẹp</span>.</p>
+            </div>
+            <div class="features">
+              <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>MA Crossover &amp; Trend Reversal</div>
+              <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="14.5 2 14.5 8 20.5 8"/><path d="M3.5 22h17a1 1 0 001-1V7l-6-5h-12a1 1 0 00-1 1v18a1 1 0 001 1z"/></svg></div>Nhận diện mô hình giá</div>
+              <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3l-4 4-4-4"/></svg></div>Quét đa khung thời gian</div>
+            </div>
+            <a href="#" class="card-cta">Xem Signal Feed <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></a>
+          </div>
+
+          <!-- Right: Signal Feed Live -->
+          <div class="signal-live-box">
+            <div class="signal-live-header">
+              <h4>Signal Feed — Live</h4>
+              <p>Cảnh báo thời gian thực từ FinMatio AI — tự động cập nhật.</p>
+            </div>
+            <div class="signal-live-scroll" id="signalLiveScroll">
+              <!-- Pinned / featured -->
+              <div class="sl-card pinned">
+                <div class="sl-row">
+                  <span class="sl-pair">BTCUSD</span>
+                  <span class="sl-tf">M5</span>
+                  <span class="sl-time">03/28, 05:08 PM</span>
+                  <span class="sl-type">TREND</span>
+                </div>
+                <div class="sl-detail"><span>Trend Condition — Sideway, Bear Bias</span></div>
+              </div>
+              <!-- Regular items -->
+              <div class="sl-card">
+                <div class="sl-row">
+                  <span class="sl-pair">USDJPY</span>
+                  <span class="sl-tf">M5</span>
+                  <span class="sl-time">11/12, 03:10 PM</span>
+                  <span class="sl-type">EVENT</span>
+                </div>
+                <div class="sl-detail"><span>MA20 cross DOWN MA50 — Bearish!</span></div>
+              </div>
+              <div class="sl-card">
+                <div class="sl-row">
+                  <span class="sl-pair">USDJPY</span>
+                  <span class="sl-tf">M5</span>
+                  <span class="sl-time">11/12, 03:05 PM</span>
+                  <span class="sl-type">ENTRY</span>
+                </div>
+                <div class="sl-detail"><span>Pullback Long — Có thể vào lệnh mua. Hỗ trợ vùng MA20.</span></div>
+              </div>
+              <div class="sl-card">
+                <div class="sl-row">
+                  <span class="sl-pair">USDJPY</span>
+                  <span class="sl-tf">M5</span>
+                  <span class="sl-time">11/12, 03:04 PM</span>
+                  <span class="sl-type">EVENT</span>
+                </div>
+                <div class="sl-detail"><span>Volume Spike — Volume Spike Detected</span></div>
+              </div>
+              <div class="sl-card">
+                <div class="sl-row">
+                  <span class="sl-pair">EURUSD</span>
+                  <span class="sl-tf">M5</span>
+                  <span class="sl-time">11/12, 03:04 PM</span>
+                  <span class="sl-type">EVENT</span>
+                </div>
+                <div class="sl-detail"><span>Volume Spike — Volume Spike Detected</span></div>
+              </div>
+              <div class="sl-card">
+                <div class="sl-row">
+                  <span class="sl-pair">XAUUSD</span>
+                  <span class="sl-tf">M5</span>
+                  <span class="sl-time">11/12, 02:15 PM</span>
+                  <span class="sl-type">EVENT</span>
+                </div>
+                <div class="sl-detail"><span>MA20 cross UP MA50 — Bullish</span></div>
+              </div>
+              <div class="sl-card">
+                <div class="sl-row">
+                  <span class="sl-pair">BTCUSD</span>
+                  <span class="sl-tf">M1</span>
+                  <span class="sl-time">11/12, 02:10 PM</span>
+                  <span class="sl-type">EVENT</span>
+                </div>
+                <div class="sl-detail"><span>Volume Spike Body — Volume Spike and Big Body Move</span></div>
+              </div>
+            </div>
+            <div class="sl-footer">Di chuột vào để tạm dừng</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Risk Bot (full-width with 2-col layout) -->
+      <div class="eco-card glass-card glass-card-hover" style="grid-column:1/-1" data-anim="zoom-in">
+        <div class="eco-card-2col">
+          <!-- Left: Info -->
+          <div>
+            <div class="eco-card-head">
+              <div class="eco-card-icon-wrap">
+                <div class="eco-card-icon grad-green"><div class="inner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div></div>
+                <div><h3>Risk Management Bot</h3><span class="tagline">Bảo vệ vốn</span></div>
+              </div>
+            </div>
+            <p class="card-desc">Đa phần Trader đều có khả năng <span class="hl-green">chọn được điểm vào lệnh khá tốt</span>. Nhưng vấn đề thực sự nằm ở chỗ — <span class="hl-red">tâm lý sốt ruột, FOMO, mất tỉnh táo</span> khiến bạn vào quá nhiều lệnh, hoặc <span class="hl-red">đi Lot quá lớn so với vốn</span>, dẫn đến nguy cơ <span class="hl-red">cháy tài khoản</span> dù phân tích đúng hướng.</p>
+            <button class="btn-reveal" onclick="toggleSolution(this)">
+              <span class="pulse-ring"></span>
+              <span class="shimmer"></span>
+              <span class="btn-text">Xem giải pháp bảo vệ vốn</span>
+              <span class="reveal-arrow">▼</span>
+            </button>
+            <div class="card-solution">
+              <p class="card-desc" style="margin-top:10px">Hãy nhớ: người chiến thắng trên thị trường này không phải người đúng 100% lệnh — mà là người <span class="hl-green">giữ kỷ luật về vốn và Lot</span>. Bạn thắng 60%, lỗ 40% — <span class="hl-green">bạn vẫn có lợi nhuận ròng 20%</span>. Chỉ cần quản lý rủi ro tốt, bạn đã <span class="hl-green">vượt qua 95% Trader thủ công</span> đang bị cảm xúc chi phối mỗi ngày.</p>
+              <p class="card-desc" style="margin-top:10px">Hệ thống Risk Management của chúng tôi sẽ <span class="hl-green">tự động giám sát khối lượng lệnh, kiểm soát Drawdown và ngăn chặn Overtrade</span> cho bạn — giúp bạn giữ kỷ luật ngay cả khi tâm lý dao động. Mức quản lý rủi ro <span class="hl-green">hoàn toàn do bạn thiết lập</span> — AI chỉ thực thi đúng kỷ luật mà bạn đặt ra.</p>
+            </div>
+            <div class="features">
+              <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>Kiểm soát Drawdown &amp; mức rủi ro</div>
+              <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>Ngăn chặn Overtrade</div>
+              <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>Quy tắc bảo vệ tài khoản</div>
+            </div>
+            <a href="#" class="card-cta">Tìm hiểu thêm <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></a>
+          </div>
+
+          <!-- Right: Risk Manager Alerts -->
+          <div class="rm-alerts">
+            <div class="rm-alerts-header">
+              <h4>Risk Manager — Tổng quan cảnh báo</h4>
+              <p>Giám sát các chỉ số rủi ro quan trọng theo thời gian thực. Hiển thị mức độ nghiêm trọng và chi tiết.</p>
+            </div>
+            <div class="rm-cards">
+              <!-- Overtrade -->
+              <div class="rm-card severity-alert">
+                <div class="rm-card-head">
+                  <div>
+                    <div class="rm-card-title">Phát hiện Overtrade</div>
+                    <div class="rm-card-sub">Nhiều lệnh liên tiếp trong thời gian ngắn</div>
+                  </div>
+                  <span class="rm-badge alert">ALERT</span>
+                </div>
+                <div class="rm-body">
+                  <div class="rm-metric">Lệnh gần đây liên tiếp: <span>16</span></div>
+                  <div class="rm-note">Ngưỡng: 5 lệnh — hệ thống sẽ tự động chặn nếu vượt giới hạn.</div>
+                  <div class="rm-action block">HÀNH ĐỘNG: Tự động chặn lệnh mới</div>
+                </div>
+              </div>
+
+              <!-- Large Volume -->
+              <div class="rm-card severity-warn">
+                <div class="rm-card-head">
+                  <div>
+                    <div class="rm-card-title">Khối lượng lệnh lớn</div>
+                    <div class="rm-card-sub">Phát hiện lệnh đơn vượt khối lượng cấu hình</div>
+                  </div>
+                  <span class="rm-badge alert">ALERT</span>
+                </div>
+                <div class="rm-body">
+                  <div class="rm-metric"><span>Phát hiện lệnh lớn — cần xem xét lại</span></div>
+                  <div class="rm-note">Ngưỡng ví dụ: 100,000</div>
+                  <div class="rm-action review">XEM XÉT: Lệnh đã được đánh dấu</div>
+                </div>
+              </div>
+
+              <!-- Drawdown -->
+              <div class="rm-card">
+                <div class="rm-card-head">
+                  <div>
+                    <div class="rm-card-title">Account Drawdown</div>
+                    <div class="rm-card-sub">Giám sát mức Drawdown so với đỉnh Equity</div>
+                  </div>
+                  <span class="rm-badge ok">OK</span>
+                </div>
+                <div class="rm-body">
+                  <div class="rm-metric">Drawdown hiện tại: <span>1.4%</span></div>
+                  <div class="rm-note">Cảnh báo ở 5% — Tự động cắt lệnh ở 8% (có thể cấu hình)</div>
+                </div>
+              </div>
+            </div>
+            <div class="rm-footer">Di chuột vào để tạm dừng cập nhật</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AutoTrade Bot (full-width with 2-col layout) -->
+      <div class="eco-card glass-card glass-card-hover" style="grid-column:1/-1" data-anim="zoom-in">
+        <div class="eco-card-2col">
+          <!-- Left: Info -->
+          <div>
+            <div class="eco-card-head">
+              <div class="eco-card-icon-wrap">
+                <div class="eco-card-icon grad-violet"><div class="inner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="11"/></svg></div></div>
+                <div><h3>AutoTrade Bot</h3><span class="tagline">Tự động hoàn toàn</span></div>
+              </div>
+              <span class="card-badge grad-violet">Pro</span>
+            </div>
+            <p class="card-desc">Khi bạn đã trải nghiệm và tin tưởng vào <span class="hl-green">Signal Bot</span> và <span class="hl-green">Risk Management Bot</span> của chúng tôi — bước tiếp theo rất tự nhiên: <span class="hl-green">để AI thay bạn thực thi toàn bộ</span>. AutoTrade Bot sẽ tự động nhận tín hiệu, <span class="hl-green">tự động vào lệnh, tự động kiểm soát rủi ro</span> theo đúng mức bạn thiết lập — chạy trên MT4/MT5 hoặc VPS, <span class="hl-red">không cần bạn mở máy, không cần ngồi canh</span>.</p>
+            <button class="btn-reveal" onclick="toggleSolution(this)">
+              <span class="pulse-ring"></span>
+              <span class="shimmer"></span>
+              <span class="btn-text">Khám phá chiến lược AI</span>
+              <span class="reveal-arrow">▼</span>
+            </button>
+            <div class="card-solution">
+              <p class="card-desc" style="margin-top:10px">Mỗi chiến lược — Scalp, DCA hay Breakout — đều được phát triển với <span class="hl-green">AI riêng biệt, phân tích bằng Quantum Algorithm</span> để xác định điểm vào lệnh hợp lý nhất khi tín hiệu xuất hiện. Bạn không chỉ có một bot — bạn có <span class="hl-green">cả một đội ngũ AI chuyên biệt</span> đang giao dịch thay bạn 24/7.</p>
+              <p class="card-desc" style="margin-top:10px">Bạn vẫn <span class="hl-green">hoàn toàn có thể can thiệp thủ công</span> vào bất kỳ lệnh nào mà bot đã vào — quyền kiểm soát luôn thuộc về bạn. Tuy nhiên, chúng tôi khuyến nghị <span class="hl-green">hãy để AI vận hành đúng kỷ luật</span> — hệ thống đã được backtest trên <span class="hl-green">dữ liệu 5 năm</span> với hiệu suất <span class="hl-green">từ 50% đến hơn 100% mỗi năm</span>. Việc can thiệp bằng cảm xúc thường <span class="hl-red">phá vỡ kỷ luật và giảm hiệu suất tổng thể</span>. Dù vậy — <span class="hl-green">lựa chọn cuối cùng luôn là của bạn</span>.</p>
+            </div>
+            <div class="features">
+              <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6m0 12v2M4.93 4.93l4.24 4.24m5.66 5.66l4.24 4.24M2 12h6m8 0h6M4.93 19.07l4.24-4.24m5.66-5.66l4.24-4.24"/></svg></div>Cài đặt nhanh, dùng ngay</div>
+              <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></div>3 chiến lược: Scalp / DCA / Breakout</div>
+              <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg></div>VPS cá nhân hoặc cài đặt trên máy</div>
+            </div>
+            <a href="#" class="card-cta">Xem chiến lược <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></a>
+          </div>
+
+          <!-- Right: AutoTrade Live Snapshot -->
+          <div class="at-snapshot">
+            <div class="at-snapshot-header">
+              <div>
+                <h4>AutoTrade Suite — Live Snapshot</h4>
+                <p>Hiển thị lệnh đang mở hoặc lệnh đóng gần nhất của mỗi Bot.</p>
+              </div>
+              <button class="at-refresh">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+                Làm mới
+              </button>
+            </div>
+            <div class="at-bots">
+              <!-- Breaktrend Bot -->
+              <div class="at-bot-card">
+                <div class="at-bot-head">
+                  <div>
+                    <div class="at-bot-name">Breaktrend Bot</div>
+                    <div class="at-bot-sub">Breaktrend</div>
+                  </div>
+                  <span class="at-status last">LAST</span>
+                </div>
+                <div class="at-rows">
+                  <div class="at-row"><span class="at-label">Pair</span><span class="at-value">BTC/USD</span></div>
+                  <div class="at-row"><span class="at-label">Side</span><span class="at-value sell">SELL</span></div>
+                  <div class="at-row"><span class="at-label">Entry</span><span class="at-value">30205.0291</span></div>
+                  <div class="at-row"><span class="at-label">TP / SL</span><span class="at-value">30205.03 / 30205.03</span></div>
+                  <div class="at-row"><span class="at-label">Closed</span><span class="at-value">24m</span></div>
+                  <div class="at-row at-pnl"><span class="at-label">P/L</span><span class="at-value pos">+1.72%</span></div>
+                </div>
+              </div>
+
+              <!-- DCA Bot -->
+              <div class="at-bot-card">
+                <div class="at-bot-head">
+                  <div>
+                    <div class="at-bot-name">DCA Bot</div>
+                    <div class="at-bot-sub">Dollar-Cost Average</div>
+                  </div>
+                  <span class="at-status open">OPEN</span>
+                </div>
+                <div class="at-rows">
+                  <div class="at-row"><span class="at-label">Pair</span><span class="at-value">EUR/USD</span></div>
+                  <div class="at-row"><span class="at-label">Side</span><span class="at-value sell">SELL</span></div>
+                  <div class="at-row"><span class="at-label">Entry</span><span class="at-value">1.0113</span></div>
+                  <div class="at-row"><span class="at-label">TP / SL</span><span class="at-value">1.0083 / 1.0128</span></div>
+                  <div class="at-row"><span class="at-label">Open for</span><span class="at-value">55m</span></div>
+                  <div class="at-row at-pnl"><span class="at-label">P/L</span><span class="at-value pos">+0.3%</span></div>
+                </div>
+              </div>
+
+              <!-- Scalper Bot -->
+              <div class="at-bot-card">
+                <div class="at-bot-head">
+                  <div>
+                    <div class="at-bot-name">Scalper Bot</div>
+                    <div class="at-bot-sub">Quick Scalping</div>
+                  </div>
+                  <span class="at-status open">OPEN</span>
+                </div>
+                <div class="at-rows">
+                  <div class="at-row"><span class="at-label">Pair</span><span class="at-value">EUR/USD</span></div>
+                  <div class="at-row"><span class="at-label">Side</span><span class="at-value buy">BUY</span></div>
+                  <div class="at-row"><span class="at-label">Entry</span><span class="at-value">1.0221</span></div>
+                  <div class="at-row"><span class="at-label">TP / SL</span><span class="at-value">1.0256 / 1.0207</span></div>
+                  <div class="at-row"><span class="at-label">Open for</span><span class="at-value">8m</span></div>
+                  <div class="at-row at-pnl"><span class="at-label">P/L</span><span class="at-value pos">+0.44%</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CopyTrade (full-width with 2-col layout) -->
+      <div class="eco-card glass-card glass-card-hover" style="grid-column:1/-1" data-anim="zoom-in">
+        <div class="eco-card-2col">
+          <!-- Left: Info -->
+          <div>
+            <div class="eco-card-head">
+              <div class="eco-card-icon-wrap">
+                <div class="eco-card-icon grad-amber"><div class="inner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div></div>
+                <div><h3>CopyTrade Network</h3><span class="tagline">Social Trading</span></div>
+              </div>
+            </div>
+            <p class="card-desc">Nếu bạn không muốn tự vận hành bot — hoặc đơn giản là <span class="hl-green">muốn rảnh tay hoàn toàn</span> để tập trung vào công việc và cuộc sống — bạn có thể tham gia <span class="hl-green">CopyTrade trực tiếp theo AutoTrade Bot</span> của chúng tôi đang vận hành trên <span class="hl-green">Exness Social CopyTrade</span> và <span class="hl-green">Myfxbook CopyTrade</span>.</p>
+            <p class="card-desc" style="margin-top:10px">Toàn bộ lịch sử vào lệnh, lãi lỗ, hiệu suất của AI Trading Bot đều <span class="hl-green">công khai và minh bạch</span> trên các nền tảng này — bạn có thể xem xét kỹ trước khi quyết định tham gia. <span class="hl-red">Không hứa hẹn, không ép buộc</span> — kết quả thực tế nói lên tất cả.</p>
+            <p class="card-desc" style="margin-top:10px">Bạn chỉ trả <span class="hl-green">một khoản phí % nhỏ khi có lợi nhuận</span> — nếu bot không thắng, bạn không mất gì. Hãy <span class="hl-green">liên hệ với chúng tôi</span> để được tư vấn chi tiết và hướng dẫn tham gia. Đây là cách đơn giản nhất để <span class="hl-green">AI giao dịch thay bạn</span> mà bạn <span class="hl-red">không cần cài đặt gì, không cần hiểu kỹ thuật</span> — chỉ cần kết nối và để hệ thống làm việc.</p>
+            <a href="#" class="card-cta" style="margin-top:20px">Khám phá mạng lưới <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></a>
+          </div>
+
+          <!-- Right: Highlight cards -->
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <!-- Card 1: Minh bạch -->
+            <div style="flex:1;padding:20px;border-radius:12px;background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(251,191,36,.08));border:1px solid rgba(245,158,11,.15)">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                <div style="width:40px;height:40px;border-radius:10px;background:rgba(245,158,11,.15);display:flex;align-items:center;justify-content:center">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber-400)" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </div>
+                <div>
+                  <div style="font-size:15px;font-weight:600;color:#fff">Minh bạch 100%</div>
+                  <div style="font-size:11px;color:var(--dark-400)">Xem trước khi quyết định</div>
+                </div>
+              </div>
+              <div style="font-size:13px;color:var(--dark-300);line-height:1.6">Lịch sử giao dịch, hiệu suất, Win Rate, Drawdown — tất cả <span class="hl-green">công khai trên Exness &amp; Myfxbook</span>. Bạn kiểm chứng trước, tham gia sau.</div>
+            </div>
+
+            <!-- Card 2: Chi phí -->
+            <div style="flex:1;padding:20px;border-radius:12px;background:linear-gradient(135deg,rgba(34,197,94,.10),rgba(20,184,166,.08));border:1px solid rgba(34,197,94,.15)">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                <div style="width:40px;height:40px;border-radius:10px;background:rgba(34,197,94,.15);display:flex;align-items:center;justify-content:center">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-400)" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                </div>
+                <div>
+                  <div style="font-size:15px;font-weight:600;color:#fff">Chỉ trả phí khi thắng</div>
+                  <div style="font-size:11px;color:var(--dark-400)">Không lợi nhuận = Không phí</div>
+                </div>
+              </div>
+              <div style="font-size:13px;color:var(--dark-300);line-height:1.6">Một khoản <span class="hl-green">% nhỏ trên lợi nhuận thực</span> — bot không thắng, bạn không mất gì. Hoàn toàn công bằng và hợp lý.</div>
+            </div>
+
+            <!-- Card 3: Đơn giản -->
+            <div style="flex:1;padding:20px;border-radius:12px;background:linear-gradient(135deg,rgba(139,92,246,.10),rgba(168,85,247,.08));border:1px solid rgba(139,92,246,.15)">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                <div style="width:40px;height:40px;border-radius:10px;background:rgba(139,92,246,.15);display:flex;align-items:center;justify-content:center">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--violet-400)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                </div>
+                <div>
+                  <div style="font-size:15px;font-weight:600;color:#fff">Kết nối là xong</div>
+                  <div style="font-size:11px;color:var(--dark-400)">Không cài đặt, không kỹ thuật</div>
+                </div>
+              </div>
+              <div style="font-size:13px;color:var(--dark-300);line-height:1.6"><span class="hl-red">Không cần hiểu code, không cần VPS</span> — chỉ cần tài khoản Broker và kết nối CopyTrade. <span class="hl-green">AI làm việc, bạn rảnh tay.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="eco-disclaimer" data-anim="fade-up">*FinMatio cung cấp công cụ trading bằng AI nhằm hỗ trợ nhà đầu tư cải thiện quyết định giao dịch. Chúng tôi không đưa ra tư vấn tài chính hay cam kết lợi nhuận. Mọi giao dịch tự động hoặc CopyTrade đều được thực hiện minh bạch qua các hệ thống Broker được quản lý.</p>
+  </div>
+</section>
+
+<!-- ═══════════════ INFRASTRUCTURE ═══════════════ -->
+<section class="section" id="infra">
+  <div class="bg-grid" style="position:absolute;inset:0;opacity:.4"></div>
+  <div class="glow" style="right:-200px;top:50%;transform:translateY(-50%);width:400px;height:600px;background:rgba(139,92,246,.04)"></div>
+
+  <div class="container" style="position:relative">
+    <div class="section-label" data-anim="fade-up">
+      <div class="badge" style="border-color:rgba(139,92,246,.2);background:rgba(139,92,246,.1)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--violet-400)" stroke-width="2"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/></svg>
+        <span style="color:var(--violet-400)">Công nghệ tiên tiến</span>
+      </div>
+    </div>
+    <h2 class="section-title" data-anim="fade-up" data-delay="1">
+      <span class="gradient-text-subtle">Hạ tầng </span>
+      <span style="background:linear-gradient(135deg,var(--violet-400),#c084fc);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Quant &amp; AI</span>
+    </h2>
+    <p class="section-desc" data-anim="fade-up" data-delay="2">Kết hợp nghiên cứu định lượng, Deep Learning và thuật toán thích ứng để vận hành hệ thống Trading tự động thế hệ mới.</p>
+
+    <div class="infra-grid">
+      <div class="infra-card glass-card glass-card-hover" data-anim="flip-up" data-delay="1">
+        <div class="infra-icon grad-blue"><div class="inner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div></div>
+        <h3>Quantitative Trading Framework</h3>
+        <p>Xây dựng trên các mô hình định lượng, chuyển đổi dữ liệu tài chính thành Signal giao dịch khả thi thông qua phân tích toán học và thống kê chặt chẽ.</p>
+        <div class="infra-details">
+          <div class="infra-detail"><span class="dot grad-blue"></span>Mô hình Statistical Arbitrage</div>
+          <div class="infra-detail"><span class="dot grad-blue"></span>Dự báo chuỗi thời gian</div>
+          <div class="infra-detail"><span class="dot grad-blue"></span>Tạo Alpha đa nhân tố</div>
+        </div>
+        <div class="infra-line"><div class="fill grad-blue"></div></div>
+      </div>
+
+      <div class="infra-card glass-card glass-card-hover" data-anim="flip-up" data-delay="2">
+        <div class="infra-icon grad-violet"><div class="inner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 017 7c0 3-2 5.5-3 7h-8c-1-1.5-3-4-3-7a7 7 0 017-7z"/><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/></svg></div></div>
+        <h3>AI &amp; Deep Learning Engine</h3>
+        <p>AI của chúng tôi liên tục học từ dữ liệu đa thị trường bằng Deep Learning và Reinforcement Learning để nhận diện các mô hình ẩn và sự thay đổi trạng thái thị trường.</p>
+        <div class="infra-details">
+          <div class="infra-detail"><span class="dot grad-violet"></span>Mạng LSTM &amp; Transformer</div>
+          <div class="infra-detail"><span class="dot grad-violet"></span>Reinforcement Learning Agent</div>
+          <div class="infra-detail"><span class="dot grad-violet"></span>Nhận diện trạng thái thị trường real-time</div>
+        </div>
+        <div class="infra-line"><div class="fill grad-violet"></div></div>
+      </div>
+
+      <div class="infra-card glass-card glass-card-hover" data-anim="flip-up" data-delay="3">
+        <div class="infra-icon grad-green"><div class="inner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div></div>
+        <h3>Tối ưu rủi ro bằng toán học</h3>
+        <p>Hệ thống Risk Intelligence áp dụng các phương pháp định lượng — bao gồm Kelly Criterion, tối ưu Expected Value và mô phỏng Monte Carlo.</p>
+        <div class="infra-details">
+          <div class="infra-detail"><span class="dot grad-green"></span>Position Sizing theo Kelly Criterion</div>
+          <div class="infra-detail"><span class="dot grad-green"></span>Stress Testing bằng Monte Carlo</div>
+          <div class="infra-detail"><span class="dot grad-green"></span>Tối ưu Expected Value</div>
+        </div>
+        <div class="infra-line"><div class="fill grad-green"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ DASHBOARD ═══════════════ -->
+<section class="section" id="dashboard">
+  <div class="glow" style="left:-150px;top:-100px;width:600px;height:400px;background:rgba(20,134,245,.04)"></div>
+
+  <div class="container" style="position:relative">
+    <div class="section-label" data-anim="fade-up">
+      <div class="badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brand-400)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Dashboard Trực tiếp
+      </div>
+    </div>
+    <h2 class="section-title" data-anim="fade-up" data-delay="1">
+      <span class="gradient-text-subtle">AI Trading </span><span class="gradient-text">Dashboard</span>
+    </h2>
+    <p class="section-desc" data-anim="fade-up" data-delay="2">Trải nghiệm cách các Bot AI vận hành theo thời gian thực — thực thi lệnh, tạo Signal và quản lý rủi ro tự động.</p>
+
+    <div class="dash-grid">
+      <!-- Left: Dashboard -->
+      <div class="glass-card" data-anim="fade-right" data-delay="1">
+        <div class="dash-header">
+          <div class="dash-tabs">
+            <button class="dash-tab active" onclick="setTab(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>AutoTrade</button>
+            <button class="dash-tab" onclick="setTab(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Signal Bot</button>
+            <button class="dash-tab" onclick="setTab(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Risk Manager</button>
+          </div>
+          <span class="dash-time" id="dashTime">--:--:--</span>
+        </div>
+        <div class="dash-body">
+          <div class="stats-row">
+            <div class="stat-box"><div class="label">Win Rate</div><div class="val-row"><span class="val">68.4%</span><span class="change pos">+2.1%</span></div></div>
+            <div class="stat-box"><div class="label">Total P&amp;L</div><div class="val-row"><span class="val">$2,847</span><span class="change pos">+$184</span></div></div>
+            <div class="stat-box"><div class="label">Drawdown</div><div class="val-row"><span class="val">3.2%</span><span class="change pos">-0.4%</span></div></div>
+          </div>
+
+          <div class="chart-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            <p>Dữ liệu biểu đồ sẽ tải từ API</p>
+            <small>Kết nối nguồn dữ liệu để xem biểu đồ trực tiếp</small>
+          </div>
+
+          <div class="trades-section">
+            <div class="trades-label">Lệnh gần đây</div>
+            <div class="trade-row">
+              <div class="trade-left"><span class="trade-type long">LONG</span><span class="trade-pair">EUR/USD</span><span class="trade-entry">@ 1.0845</span></div>
+              <span class="trade-pnl pos">+$42</span>
+            </div>
+            <div class="trade-row">
+              <div class="trade-left"><span class="trade-type short">SHORT</span><span class="trade-pair">GBP/USD</span><span class="trade-entry">@ 1.2671</span></div>
+              <span class="trade-pnl pos">+$28</span>
+            </div>
+            <div class="trade-row">
+              <div class="trade-left"><span class="trade-type long">LONG</span><span class="trade-pair">BTC/USD</span><span class="trade-entry">@ 87,450</span></div>
+              <span class="trade-pnl neg">-$15</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Signal Feed -->
+      <div class="glass-card" style="display:flex;flex-direction:column" data-anim="fade-left" data-delay="2">
+        <div class="signal-header">
+          <div class="live"><span class="dot"></span><h3>Signal Feed — Trực tiếp</h3></div>
+          <a href="#" class="view-all">Xem tất cả <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></a>
+        </div>
+        <div class="signal-list" id="signalList">
+          <!-- JS will populate -->
+        </div>
+        <div class="signal-footer">Dữ liệu hiển thị ở đây là mô phỏng cho mục đích demo.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ CTA ═══════════════ -->
+<section class="section cta" style="overflow:hidden">
+  <div class="glow" style="left:50%;top:50%;transform:translate(-50%,-50%);width:700px;height:500px;background:rgba(20,134,245,.08)"></div>
+
+  <div class="container" style="position:relative">
+    <div class="cta-icon" data-anim="scale-up">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/></svg>
+    </div>
+    <h2 data-anim="fade-up" data-delay="1">
+      <span class="gradient-text-subtle">Sẵn sàng trải nghiệm</span><br>
+      <span class="gradient-text">Trading thông minh?</span>
+    </h2>
+    <p data-anim="fade-up" data-delay="2">Bắt đầu với bản demo miễn phí hoặc yêu cầu hướng dẫn sản phẩm ngay hôm nay. Không cần thẻ tín dụng.</p>
+    <div class="cta-btns" data-anim="fade-up" data-delay="3">
+      <a href="#" class="btn-primary">Dùng thử miễn phí <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+      <a href="#" class="btn-secondary">Yêu cầu Demo</a>
+    </div>
+    <div class="cta-badges" data-anim="fade-up" data-delay="4">
+      <div class="cta-badge"><span class="dot"></span>Không cần thẻ tín dụng</div>
+      <div class="cta-badge"><span class="dot"></span>Dùng thử 14 ngày</div>
+      <div class="cta-badge"><span class="dot"></span>Hủy bất cứ lúc nào</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer>
+  <div class="container section" style="padding-top:64px;padding-bottom:48px">
+    <div class="footer-grid">
+      <div class="footer-brand" data-anim="fade-up">
+        <a href="#" class="logo">
+          <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:var(--brand-400)"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+          <div class="logo-text">Fin<span>Matio</span></div>
+        </a>
+        <p>Nền tảng AI Trading tự động. Giúp nhà đầu tư đưa ra quyết định thông minh hơn dựa trên dữ liệu.</p>
+        <div class="social-links">
+          <a href="#" class="social-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5 0-.28-.03-.56-.08-.83A7.72 7.72 0 0023 3z"/></svg></a>
+          <a href="#" class="social-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg></a>
+          <a href="#" class="social-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+          <a href="#" class="social-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col"><h4>Sản phẩm</h4><ul><li><a href="#">Signal Bot</a></li><li><a href="#">Risk Manager</a></li><li><a href="#">AutoTrade</a></li><li><a href="#">CopyTrade</a></li><li><a href="#">Bảng giá</a></li></ul></div>
+      <div class="footer-col"><h4>Tài nguyên</h4><ul><li><a href="#">Tài liệu</a></li><li><a href="#">Tham chiếu API</a></li><li><a href="#">Blog</a></li><li><a href="#">Nhật ký thay đổi</a></li></ul></div>
+      <div class="footer-col"><h4>Công ty</h4><ul><li><a href="#">Giới thiệu</a></li><li><a href="#">Tuyển dụng</a></li><li><a href="#">Liên hệ</a></li><li><a href="#">Đối tác</a></li></ul></div>
+      <div class="footer-col"><h4>Pháp lý</h4><ul><li><a href="#">Chính sách bảo mật</a></li><li><a href="#">Điều khoản dịch vụ</a></li><li><a href="#">Cảnh báo rủi ro</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 FinMatio. Bảo lưu mọi quyền.</p>
+      <p class="disclaimer">FinMatio cung cấp công cụ trading bằng AI nhằm hỗ trợ nhà đầu tư. Chúng tôi không đưa ra tư vấn tài chính hay cam kết lợi nhuận. Mọi giao dịch được thực hiện qua hệ thống Broker được quản lý.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════ JAVASCRIPT ═══════════════ -->
+<script>
+// Toggle solution reveal
+function toggleSolution(btn) {
+  const solution = btn.nextElementSibling;
+  const isOpen = solution.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+  const textEl = btn.querySelector('.btn-text');
+  if (isOpen) {
+    textEl.textContent = 'Thu gọn';
+    // Stop attention animations once opened
+    const ring = btn.querySelector('.pulse-ring');
+    const shimmer = btn.querySelector('.shimmer');
+    const arrow = btn.querySelector('.reveal-arrow');
+    if (ring) ring.style.animation = 'none';
+    if (shimmer) shimmer.style.animation = 'none';
+    textEl.style.animation = 'none';
+  } else {
+    // Restore label based on card context
+    const card = btn.closest('.eco-card');
+    const h3 = card.querySelector('h3');
+    if (h3.textContent.includes('Signal')) textEl.textContent = 'Xem giải pháp từ AI';
+    else if (h3.textContent.includes('Risk')) textEl.textContent = 'Xem giải pháp bảo vệ vốn';
+    else textEl.textContent = 'Khám phá chiến lược AI';
+  }
+}
+
+// Navbar scroll effect
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// Dashboard clock
+function updateClock() {
+  const now = new Date();
+  document.getElementById('dashTime').textContent =
+    now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// Dashboard tabs
+function setTab(btn) {
+  document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Terminal typing animation
+const terminalLines = [
+  { text: 'Đang kết nối dữ liệu thị trường...', color: '#8592ab' },
+  { text: 'Đã tải dữ liệu EUR/USD khung H1', color: '#8adbff' },
+  { text: 'RSI: 62.4 | MACD: Bullish Cross | ATR: 0.0038', color: '#b0b8c9' },
+  { text: 'AI nhận định: Bullish', color: '#4ade80' },
+  { text: 'Phát hiện setup: Trend Continuation', color: '#fbbf24' },
+  { text: 'Vào lệnh LONG @ 1.0845 | SL: 1.0807 | TP: 1.0921', color: '#86efac' },
+  { text: 'Đang giám sát — max drawdown < 0.5%', color: '#8592ab' },
+];
+
+function runTerminal() {
+  const body = document.getElementById('terminalBody');
+  body.innerHTML = '';
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i >= terminalLines.length) {
+      // Add cursor
+      const cursor = document.createElement('div');
+      cursor.style.cssText = 'display:flex;align-items:center;gap:8px;margin-top:4px';
+      cursor.innerHTML = '<span style="color:var(--brand-600)">$</span><span class="terminal-cursor"></span>';
+      body.appendChild(cursor);
+      clearInterval(interval);
+      setTimeout(runTerminal, 3000);
+      return;
+    }
+    const line = document.createElement('div');
+    line.className = 'terminal-line';
+    line.style.animationDelay = '0s';
+    line.innerHTML = `<span class="prompt">$</span><span style="color:${terminalLines[i].color}">${terminalLines[i].text}</span>`;
+    body.appendChild(line);
+    i++;
+  }, 700);
+}
+runTerminal();
+
+// Signal Feed
+const signals = [
+  { pair:'BTCUSD', tf:'M5', time:'04:06 PM', type:'TREND', detail:'Xu hướng — Sideway, thiên Bullish', dir:'up' },
+  { pair:'EURUSD', tf:'H1', time:'03:55 PM', type:'SIGNAL', detail:'Bullish Engulfing — Setup mua mạnh', dir:'up' },
+  { pair:'BTCUSD', tf:'M5', time:'03:35 PM', type:'TREND', detail:'Xu hướng — Sideway, thiên Bullish', dir:'up' },
+  { pair:'XAUUSD', tf:'M15', time:'03:28 PM', type:'EVENT', detail:'Volume Spike — Phát hiện khối lượng lớn', dir:'neutral' },
+  { pair:'BTCUSD', tf:'M1', time:'03:20 PM', type:'EVENT', detail:'Volume Spike Body — Biến động giá mạnh', dir:'neutral' },
+  { pair:'BTCUSD', tf:'M5', time:'03:04 PM', type:'TREND', detail:'Xu hướng — Sideway, thiên Bearish', dir:'down' },
+];
+
+const dirIcons = {
+  up: '<svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>',
+  down: '<svg viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>',
+  neutral: '<svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+};
+
+const typeClass = { TREND:'trend', SIGNAL:'signal', EVENT:'event' };
+
+const list = document.getElementById('signalList');
+signals.forEach(s => {
+  list.innerHTML += `
+    <div class="signal-item">
+      <div class="signal-icon">${dirIcons[s.dir]}</div>
+      <div class="signal-info">
+        <div class="signal-meta">
+          <span class="signal-pair">${s.pair}</span>
+          <span class="signal-tf">${s.tf}</span>
+          <span class="signal-type ${typeClass[s.type]}">${s.type}</span>
+        </div>
+        <div class="signal-detail">${s.detail}</div>
+        <div class="signal-time">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          ${s.time}
+        </div>
+      </div>
+    </div>`;
+});
+
+// ═══════════════════════════════════════════
+//   SCROLL ANIMATION ENGINE
+// ═══════════════════════════════════════════
+
+// 1. IntersectionObserver for data-anim elements
+const animObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('in-view');
+      animObserver.unobserve(entry.target); // animate once
+    }
+  });
+}, { threshold:0.15, rootMargin:'0px 0px -40px 0px' });
+
+document.querySelectorAll('[data-anim]').forEach(el => animObserver.observe(el));
+
+// 2. Observer for stat-boxes (pop animation)
+const statObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.querySelectorAll('.stat-box').forEach((box, i) => {
+        setTimeout(() => box.classList.add('in-view'), i * 150);
+      });
+      statObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold:0.3 });
+
+const statsRow = document.querySelector('.stats-row');
+if (statsRow) statObserver.observe(statsRow);
+
+// 3. Observer for trades section (slide animation)
+const tradesObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('in-view');
+      tradesObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold:0.3 });
+
+const tradesSection = document.querySelector('.trades-section');
+if (tradesSection) tradesObserver.observe(tradesSection);
+
+// 4. Observer for signal list (stagger items)
+const signalObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('signal-list-ready');
+      signalObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold:0.2 });
+
+const signalListEl = document.getElementById('signalList');
+if (signalListEl) signalObserver.observe(signalListEl);
+
+// 5. Observer for footer columns
+const footerObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('footer-ready');
+      footerObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold:0.2 });
+
+const footerGrid = document.querySelector('.footer-grid');
+if (footerGrid) footerObserver.observe(footerGrid);
+
+// 6. Observer for CTA badges
+const ctaBadgeObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('in-view');
+      ctaBadgeObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold:0.5 });
+
+const ctaBadges = document.querySelector('.cta-badges');
+if (ctaBadges) ctaBadgeObserver.observe(ctaBadges);
+
+// 7. Subtle parallax on bg-grid elements (safe — no inline transforms)
+let ticking = false;
+window.addEventListener('scroll', () => {
+  if (!ticking) {
+    requestAnimationFrame(() => {
+      const scrollY = window.scrollY;
+      document.querySelectorAll('.bg-grid').forEach(bg => {
+        bg.style.transform = `translateY(${scrollY * 0.03}px)`;
+      });
+      ticking = false;
+    });
+    ticking = true;
+  }
+});
+
+// 8. Hero elements: trigger immediately since they're visible on load
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    document.querySelectorAll('.hero [data-anim]').forEach(el => {
+      el.classList.add('in-view');
+    });
+  }, 200);
+});
+
+// 9. Observer for infra cards (also triggers line fill)
+const infraObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('in-view');
+      infraObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold:0.2 });
+
+document.querySelectorAll('.infra-card').forEach(card => infraObserver.observe(card));
+
+// 10. Observer for eco-cards (also triggers feature stagger)
+const ecoObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('in-view');
+      ecoObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold:0.1 });
+
+document.querySelectorAll('.eco-card').forEach(card => ecoObserver.observe(card));
+</script>
+</body>
+</html>
